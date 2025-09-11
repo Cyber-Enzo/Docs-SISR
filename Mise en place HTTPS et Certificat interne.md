@@ -1,5 +1,5 @@
-# Mise en oeuvre de l'HTTPS sur un serveur web
-# Utilisation d'une autorité de certification interne
+# 1. Mise en oeuvre de l'HTTPS sur un serveur web
+# 2. Utilisation d'une autorité de certification interne
 
 ## 1. Préparation de la machine CA 
 - Configuration IP : /etc/network/interfaces
