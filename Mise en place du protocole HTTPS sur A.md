@@ -12,17 +12,26 @@ Sécuriser l’accès à votre site web avec HTTPS en créant votre propre autor
   ```bash
   sudo apt install openssl
   ```
+
 - Modifiez `/etc/ssl/openssl.cnf` :  
-  Remplacez la variable `dir = ./demoCA` par `dir = /etc/ssl`.
-  **Modifiez également le chemin du certificat CA :**
-  Remplacez :
-  ```
-  certificate = $dir/cacert.pem
-  ```
-  par :
-  ```
-  certificate = $dir/certs/cacert.pem
-  ```
+**Modifiez 
+ Remplacez :
+ ```
+ dir = ./demoCA 
+ ```
+ par :
+ ```
+ dir = /etc/ssl
+ ```
+ **Modifiez également le chemin du certificat CA :**
+ Remplacez :
+ ```
+ certificate = $dir/cacert.pem
+ ```
+ par :
+ ```
+ certificate = $dir/certs/cacert.pem
+ ```
 
 - Créez l’arborescence nécessaire :
   ```bash
@@ -83,13 +92,17 @@ Ce certificat auto-signé servira à authentifier et valider les certificats ém
 
 **a. Générer la clé privée du serveur :**
 
-- Modifiez `/etc/ssl/openssl.cnf` :  
-  Remplacez la variable `dir = ./demoCA` par `dir = /etc/ssl`.
-  **Vérifiez que le chemin du certificat CA est bien `$dir/certs/cacert.pem`.**
-  
-```bash
-sudo openssl genrsa -out /etc/ssl/private/srvwebkey.pem 4096
-```
+ Modifiez `/etc/ssl/openssl.cnf` :  
+ Remplacez la variable `dir = ./demoCA` par `dir = /etc/ssl`.
+ **Modifiez également le chemin du certificat CA :**
+ Remplacez :
+ ```
+ certificate = $dir/cacert.pem
+ ```
+ par :
+ ```
+ certificate = $dir/certs/cacert.pem
+ ```
 
 **b. Générer la demande de certificat (CSR) :**
 ```bash
