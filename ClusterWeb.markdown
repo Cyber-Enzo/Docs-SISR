@@ -119,14 +119,20 @@ nodeid:         2:      connected
 
 ## 6. Clonage du serveur web
 
-Pour assurer la haute disponibilité, éteignez le serveur web principal et effectuez un clonage complet sur le second nœud.
 
-Pour vérifier que tout fonctionne et que les serveurs web sont bien pris en compte par le cluster, utilisez la commande suivante :
+**Pour assurer la haute disponibilité :**
+
+- Éteignez le serveur web principal.
+- Effectuez un clonage complet sur le second nœud.
+
+**Pour vérifier que tout fonctionne :**
+
+Utilisez la commande suivante :
 
 ```bash
 crm status
 ```
 
-La sortie doit indiquer que le cluster est "online" avec le nom des deux serveurs web, tels qu'ils sont définis dans `/etc/hosts` et avec le hostname configuré précédemment.
+La sortie doit indiquer que le cluster est **online** avec le nom des deux serveurs web, tels qu'ils sont définis dans `/etc/hosts` et dans `/etc/hostname` configuré précédemment.
 
 ---
