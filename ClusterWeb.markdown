@@ -168,6 +168,8 @@ Pour configurer le failover d'IP :
 crm configure primitive IPFailover ocf:heartbeat:IPaddr2 params ip=172.16.0.12 cidr_netmask=24 nic=ens33 iflabel=VIP
 ```
 
+> **Remarque :** `ens33` correspond à l'interface réseau utilisée sur cet exemple. Pensez à remplacer `ens33` par le nom de votre propre interface réseau (ex : `eth0`, `enp0s3`, etc.) selon votre configuration.
+
 Après configuration :
 - La commande `ip a` affichera l'IP de la machine et l'IP du cluster.
 - `crm configure show` permet de voir le nouveau paramètre.
