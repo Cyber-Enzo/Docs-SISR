@@ -1,0 +1,142 @@
+# Mise en place du protocole HTTPS sur Apache2
+
+## 1. Objectif
+
+Sécuriser l’accès à votre site web avec HTTPS en créant votre propre autorité de certification (CA) et en configurant Apache2 pour utiliser SSL/TLS.
+
+---
+
+## 2. Installation et configuration d'OpenSSL
+
+- Vérifiez l’installation d’OpenSSL :
+  ```bash
+  sudo apt install openssl
+  ```
+- Modifiez `/etc/ssl/openssl.cnf` :  
+  Remplacez la variable `dir = ./demoCA` par `dir = /etc/ssl`.
+
+- Créez l’arborescence nécessaire :
+  ```bash
+  sudo mkdir -p /etc/ssl/
+  sudo touch /etc/ssl/index.txt
+  echo "01" > /etc/ssl/serial
+  ```
+
+---
+
+## 3. Création du certificat de l’autorité de certification (CA)
+
+**a. Générer la clé privée de la CA :**
+Si un dossier spécifique dans `/etc/ssl` est utilisé, il faut alors créer les dossiers private et certs dans le dossier /ssl. Par exemple dans le dossier `/etc/ssl/sodecaf` :
+```bash
+mkdir /etc/ssl/sodecaf/private
+mkdir /etc/ssl/sodecaf/certs
+```
+```bash
+sudo openssl genrsa -des3 -out /etc/ssl/private/cakey.pem 4096
+sudo chmod 400 /etc/ssl/private/cakey.pem
+```
+
+**b. Générer le certificat auto-signé de la CA :**
+```bash
+sudo openssl req -new -x509 -days 1825 -key /etc/ssl/private/cakey.pem -out /etc/ssl/certs/cacert.pem
+```
+*Remplissez les champs demandés (notamment le Common Name).*
+
+---
+
+## 4. Création du certificat du serveur web
+
+**a. Générer la clé privée du serveur :**
+```bash
+sudo openssl genrsa -out /etc/ssl/private/srvwebkey.pem 4096
+```
+
+**b. Générer la demande de certificat (CSR) :**
+```bash
+sudo openssl req -new -key /etc/ssl/private/srvwebkey.pem -out /etc/ssl/srvwebcert.dem
+```
+*Le Common Name doit correspondre au nom DNS du serveur.*
+
+**c. Signer le certificat avec la CA :**
+```bash
+sudo openssl ca -policy policy_anything -out /etc/ssl/certs/srvwebcert.pem -infiles /etc/ssl/srvwebcert.dem
+```
+*Répondez "y" aux questions de confirmation.*
+
+---
+
+## 5. Configuration d’Apache2 pour HTTPS
+
+**a. Activez le module SSL :**
+```bash
+sudo a2enmod ssl
+sudo systemctl restart apache2
+```
+
+**b. Modifiez le fichier de configuration du site :**
+Dans `/etc/apache2/sites-available/000-default.conf` ou votre fichier de virtual host :
+
+Remplacez :
+```apache
+<VirtualHost *:80>
+```
+par
+```apache
+<VirtualHost *:443>
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/srvwebcert.pem
+    SSLCertificateKeyFile /etc/ssl/private/srvwebkey.pem
+</VirtualHost>
+```
+
+**c. (Optionnel) Rediriger HTTP vers HTTPS :**
+Activez le module rewrite :
+```bash
+sudo a2enmod rewrite
+```
+Ajoutez dans le virtual host port 80 :
+```apache
+<VirtualHost *:80>
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
+</VirtualHost>
+```
+
+---
+
+## 6. Débogage et vérification
+
+- Pour isoler les erreurs SSL :
+  ```apache
+  ErrorLog /var/log/apache2/error_ssl.log
+  LogLevel debug
+  ```
+  Visualisez les logs :
+  ```bash
+  tail -f /var/log/apache2/error_ssl.log
+  ```
+
+- Testez la connexion SSL :
+  ```bash
+  openssl s_client -connect nom_dns:443
+  ```
+
+---
+
+## 7. Test du serveur web sécurisé
+
+- Accédez à votre site via https://IP_ou_DNS
+- Ajoutez une exception dans le navigateur (alerte normale, CA inconnue).
+- Vérifiez les infos du certificat et de l’autorité de certification.
+
+---
+
+## Ressources
+
+- [Service web sécurisé - Réseau Certa](https://www.reseaucerta.org/content/service-web-securise)
+
+---
+
+Votre serveur web est maintenant accessible en HTTPS avec un certificat signé par votre propre autorité
