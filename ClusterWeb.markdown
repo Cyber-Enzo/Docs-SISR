@@ -157,3 +157,30 @@ crm configure property no-quorum-policy="ignore"
 ```
 
 
+
+---
+
+### Configuration du Failover IP
+
+Pour configurer le failover d'IP :
+
+```bash
+crm configure primitive IPFailover ocf:heartbeat:IPaddr2 params ip=172.16.0.12 cidr_netmask=24 nic=ens33 iflabel=VIP
+```
+
+Après configuration :
+- La commande `ip a` affichera l'IP de la machine et l'IP du cluster.
+- `crm configure show` permet de voir le nouveau paramètre.
+- `crm status` affiche la ressource IPFailover.
+
+Pour tester le basculement :
+- Mettez un nœud en standby :
+    ```bash
+    crm node standby
+    ```
+    L'IP du cluster basculera sur le nœud restant online.
+
+- Pour réactiver un nœud :
+    ```bash
+    crm node online
+    ```
