@@ -1,4 +1,4 @@
-# Mise en place du protocole HTTPS sur Apache2
+# Création du CA et mise en place du protocole HTTPS sur Apache2
 
 ## 1. Objectif
 
@@ -66,6 +66,10 @@ Ce certificat auto-signé servira à authentifier et valider les certificats ém
 ## 4. Création du certificat du serveur web
 
 **a. Générer la clé privée du serveur :**
+
+- Modifiez `/etc/ssl/openssl.cnf` :  
+  Remplacez la variable `dir = ./demoCA` par `dir = /etc/ssl`.
+  
 ```bash
 sudo openssl genrsa -out /etc/ssl/private/srvwebkey.pem 4096
 ```
