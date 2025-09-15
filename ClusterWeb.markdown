@@ -175,14 +175,52 @@ Après configuration :
 - `crm configure show` permet de voir le nouveau paramètre.
 - `crm status` affiche la ressource IPFailover.
 
-Pour tester le basculement :
-- Mettez un nœud en standby :
-    ```bash
-    crm node standby
-    ```
-    L'IP du cluster basculera sur le nœud restant online.
 
-- Pour réactiver un nœud :
-    ```bash
-    crm node online
-    ```
+---
+
+### Tester le basculement du cluster
+
+Pour mettre un nœud en standby :
+
+```bash
+crm node standby
+```
+> L'IP du cluster basculera automatiquement sur le nœud restant online.
+
+Pour réactiver un nœud :
+
+```bash
+crm node online
+```
+
+---
+
+### Créer une ressource pour le service web
+
+Pour qu'un serveur gère le service web et l'autre le failover, créez la ressource :
+
+```bash
+crm configure primitive serviceWeb lsb:apache2 op monitor interval=60s op start interval=0 timeout=60s op stop interval=0 timeout=60s
+```
+
+---
+
+### Regrouper les ressources IPFailOver et serviceWeb
+
+Pour regrouper les deux ressources :
+
+```bash
+crm configure group servweb IPFailover serviceWeb meta migration-threshold="5"
+```
+
+---
+
+### Définir une préférence de nœud primaire pour l'IP virtuelle
+
+Pour déplacer la ressource IPFailOver sur un nœud spécifique :
+
+```bash
+crm resource move IPFailover srv-web1
+```
+
+
