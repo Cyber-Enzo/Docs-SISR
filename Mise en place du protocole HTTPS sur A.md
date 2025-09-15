@@ -76,7 +76,7 @@ sudo openssl genrsa -out /etc/ssl/private/srvwebkey.pem 4096
 
 **b. Générer la demande de certificat (CSR) :**
 ```bash
-sudo openssl req -new -key /etc/ssl/private/srvwebkey.pem -out /etc/ssl/srvwebcert.dem
+sudo openssl req -new -key /etc/ssl/private/srvwebkey.pem -out /etc/ssl/srvwebcert_dem.pem
 ```
 *Le Common Name doit correspondre au nom DNS du serveur.*
 
