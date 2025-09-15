@@ -59,3 +59,5 @@ SELECT * FROM Visiteur;
 ---
 
 Adapte les noms (`nom`, `User`, `Visiteur`, etc.) selon ton projet.
+
+
