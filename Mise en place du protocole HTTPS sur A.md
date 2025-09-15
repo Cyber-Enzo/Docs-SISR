@@ -138,6 +138,17 @@ sudo openssl ca -policy policy_anything -out /etc/ssl/certs/srvwebcert.pem -infi
 ```
 *Répondez "y" aux questions de confirmation.*
 
+**e. Déplacement et changement de propriétaire du certificat de la machine CA au serveur web**
+
+```bash
+scp /etc/ssl/sodecaf/certs/srvwebcert.pem etudiant@172.16.0.10:/home/etudiant
+```
+Sur le serveur Web :
+```bash
+mv /home/etudiant/srvwebcert.pem /etc/ssl/certs/
+chown root:root /etc/ssl/certs/srvwebcert.pem
+```
+
 ---
 
 ## 5. Configuration d’Apache2 pour HTTPS
