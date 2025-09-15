@@ -174,6 +174,11 @@ par
     SSLCertificateKeyFile /etc/ssl/private/srvwebkey.pem
 </VirtualHost>
 ```
+- Activation du site et redémarrage du service Apache2
+```bash
+a2ensite sodecaf-ssl.conf
+systemctl restart apache2
+```
 
 **c. (Optionnel) Rediriger HTTP vers HTTPS :**
 Activez le module rewrite :
