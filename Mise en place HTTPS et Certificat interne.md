@@ -180,7 +180,7 @@ a2ensite sodecaf-ssl.conf
 systemctl restart apache2
 ```
 
-**c. (Optionnel) Rediriger HTTP vers HTTPS :**
+**c. Rediriger HTTP vers HTTPS :**
 Activez le module rewrite :
 ```bash
 sudo a2enmod rewrite
