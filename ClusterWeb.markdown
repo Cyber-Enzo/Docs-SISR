@@ -131,8 +131,29 @@ Utilisez la commande suivante :
 
 ```bash
 crm status
+crm configure show
+
 ```
 
 La sortie doit indiquer que le cluster est **online** avec le nom des deux serveurs web, tels qu'ils sont définis dans `/etc/hosts` et dans `/etc/hostname` configuré précédemment.
 
 ---
+
+
+### Désactiver le STONITH (Shoot The Other Node In The Head)
+
+Pour désactiver le stonith :
+
+```bash
+crm configure property stonith-enabled=false
+```
+
+### Désactiver le Quorum
+
+Pour ignorer la politique de quorum :
+
+```bash
+crm configure property no-quorum-policy="ignore"
+```
+
+
