@@ -160,7 +160,10 @@ sudo systemctl restart apache2
 ```
 
 **b. Modifiez le fichier de configuration du site :**
-Dans `/etc/apache2/sites-available/000-default.conf` ou votre fichier de virtual host :
+
+
+
+Dans `/etc/apache2/sites-available/sodecaf-ssl.conf` ou votre fichier de virtual host :
 
 Remplacez :
 ```apache
@@ -173,6 +176,12 @@ par
     SSLCertificateFile /etc/ssl/certs/srvwebcert.pem
     SSLCertificateKeyFile /etc/ssl/private/srvwebkey.pem
 </VirtualHost>
+```
+
+- Activation du site et redémarrage du service Apache2
+```bash
+a2ensite sodecaf-ssl.conf
+systemctl restart apache2
 ```
 
 **c. (Optionnel) Rediriger HTTP vers HTTPS :**
