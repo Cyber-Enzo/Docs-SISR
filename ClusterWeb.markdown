@@ -101,13 +101,14 @@ service {
 
 ## 5. Tester la configuration
 
-Lancez Corosync pour tester la configuration :
+
+Après avoir démarré Corosync, vérifiez la configuration du cluster et la détection des nœuds avec :
 
 ```bash
-corosync
+corosync-cfgtool -s
 ```
 
-Vérifiez que le service démarre sans erreur.
+Cette commande affiche l'IP et les deux nœuds du cluster. Vérifiez que les deux serveurs apparaissent bien dans la sortie.
 
 ---
 
