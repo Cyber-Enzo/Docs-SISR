@@ -108,7 +108,20 @@ Après avoir démarré Corosync, vérifiez la configuration du cluster et la dé
 corosync-cfgtool -s
 ```
 
-Cette commande affiche l'IP et les deux nœuds du cluster. Vérifiez que les deux serveurs apparaissent bien dans la sortie.
+La commande `corosync-cfgtool -s` affiche l'état des nœuds, mais ne montre pas directement les noms des serveurs. Vous verrez par exemple :
+
+```
+nodeid:         1:      localhost
+nodeid:         2:      connected
+```
+
+Pour vérifier que tout fonctionne et que les serveurs web sont bien pris en compte par le cluster, utilisez la commande suivante :
+
+```bash
+crm status
+```
+
+La sortie doit indiquer que le cluster est "online" avec le nom des deux serveurs web, tels qu'ils sont définis dans `/etc/hosts` et avec le hostname configuré précédemment.
 
 ---
 
@@ -117,5 +130,3 @@ Cette commande affiche l'IP et les deux nœuds du cluster. Vérifiez que les deu
 Pour assurer la haute disponibilité, éteignez le serveur web principal et effectuez un clonage complet sur le second nœud.
 
 ---
-
-Ce fichier .markdown explique chaque étape et affiche tous les blocs de configuration et commandes nécessaires pour mettre en œuvre un cluster web avec Corosync.
