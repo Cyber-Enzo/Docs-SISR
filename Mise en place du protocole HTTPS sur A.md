@@ -27,7 +27,7 @@ Sécuriser l’accès à votre site web avec HTTPS en créant votre propre autor
 ## 3. Création du certificat de l’autorité de certification (CA)
 
 **a. Générer la clé privée de la CA :**
-Si un dossier spécifique dans `/etc/ssl` est utilisé, il faut alors créer les dossiers private et certs dans le dossier /ssl. Par exemple dans le dossier `/etc/ssl/sodecaf` :
+Si un dossier spécifique dans `/etc/ssl` est utilisé, il faut alors créer les dossiers `private` et `certs` dans le dossier `/ssl`. Par exemple dans le dossier `/etc/ssl/sodecaf` :
 ```bash
 mkdir /etc/ssl/sodecaf/private
 mkdir /etc/ssl/sodecaf/certs
@@ -38,10 +38,28 @@ sudo chmod 400 /etc/ssl/private/cakey.pem
 ```
 
 **b. Générer le certificat auto-signé de la CA :**
+
+Générez le certificat auto-signé pour votre autorité de certification :
+
 ```bash
 sudo openssl req -new -x509 -days 1825 -key /etc/ssl/private/cakey.pem -out /etc/ssl/certs/cacert.pem
 ```
-*Remplissez les champs demandés (notamment le Common Name).*
+
+Lors de l’exécution de cette commande, remplissez les champs comme suit :
+
+| Champ                        | Valeur à saisir           |
+|------------------------------|---------------------------|
+| Country Name (2 letter code) | **FR**                    |
+| State or Province Name       | **France**                |
+| Locality Name                | **Montauban**             |
+| Organization Name            | **Sodecaf**               |
+| Organizational Unit Name     | *(laisser vide)*          |
+| Common Name                  | **ca.sodecaf.local**      |
+| Email Address                | **webmaster@sodecaf.local** |
+
+> **Astuce :** Vous pouvez laisser le champ « Organizational Unit Name » vide en appuyant simplement sur Entrée.
+
+Ce certificat auto-signé servira à authentifier et valider les certificats émis pour vos serveurs
 
 ---
 
