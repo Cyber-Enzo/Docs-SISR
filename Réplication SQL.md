@@ -1,5 +1,5 @@
 
-# Mise en place de la réplication de base de données MariaDB
+# 1. Mise en place de la réplication de base de données MariaDB
 
 ## 1. Préparation du dossier de logs
 
@@ -181,6 +181,133 @@ SHOW SLAVE STATUS \G;
 ```
 > Remarque : Les deux machines doivent avoir la même position pour garantir la synchronisation.
 
+
+# 2. — Partie 2 : Mode multi‑maître (failover)
+
+Cette deuxième partie explique comment préparer les deux serveurs pour un scénario "multi‑maître" (chaque serveur est maître et esclave) afin de gérer la défaillance du serveur principal.
+
+Important : avant d'appliquer ces modifications, assurez‑vous d'avoir sauvegardé les fichiers de configuration et les données en faisant une snapshot.
+
+## Sur le maître
+
+Éditez le fichier de configuration :
+
+```bash
+sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
+```
+
+Réécrivez/ajoutez les deux paramètres vus sur l'esclave et ajoutez la ligne `log-slave-updates` :
+
+```ini
+master-retry-count = 20
+replicate-do-db = nom_de_la_base_de_donnees
+log-slave-updates
+```
+
+`master-retry-count` augmente la tolérance aux erreurs de connexion au maître. `replicate-do-db` restreint la réplication à la base indiquée. `log-slave-updates` permet à cet hôte d'écrire dans son propre binlog les mises à jour reçues (nécessaire en configuration multi‑maître).
+
+## Sur l'autre serveur (l'esclave)
+
+Éditez également son fichier de configuration :
+
+```bash
+sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
+```
+
+Appliquez les modifications suivantes :
+
+- Commentez la ligne :
+	```ini
+	#bind-address = 127.0.0.1
+	```
+- Décommentez/ajoutez la ligne `log-bin` si nécessaire :
+	```ini
+	log_bin = /var/log/mysql/mariadb-bin
+	```
+- Ajoutez les lignes suivantes :
+	```ini
+	binlog_do_db = nom_de_la_base_de_donnees
+	log-slave-updates
+	```
+
+## Redémarrage des services
+
+Après modification des fichiers de configuration sur chaque serveur :
+
+```bash
+sudo systemctl restart mariadb
+```
+
+Vérifiez ensuite le statut de réplication et faites des tests d'écriture/lire pour confirmer la synchronisation.
      
 
+Sur le serveur esclave (servweb2) :
+
+- Créer l'utilisateur replicateur :
+	```sql
+	CREATE USER 'replicateur'@'%' IDENTIFIED BY 'mot_de_passe';
+	```
+- Lui donner les droits :
+	```sql
+	GRANT REPLICATION SLAVE ON *.* TO 'replicateur'@'%';
+	```
+
+
+---
+
+## Synchronisation finale et bascule multi-maître
+
+### 1. Arrêter l'esclave sur les deux serveurs
+
+Dans MariaDB sur chaque serveur :
+```sql
+STOP SLAVE;
+```
+
+### 2. Récupérer les informations de log
+
+Sur chaque serveur, notez le nom du fichier de log binaire (`mysql-bin.00000x`) et la position (`SHOW MASTER STATUS;`).
+
+### 3. Configurer la bascule croisée
+
+Sur le **serveur 1** (remplacez les valeurs par celles du serveur 2) :
+```sql
+CHANGE MASTER TO master_host='172.16.0.11', master_user='replicateur', master_password='mot_de_passe', master_log_file='mysql-bin.000001', master_log_pos=328;
+```
+Sur le **serveur 2** (remplacez les valeurs par celles du serveur 1) :
+```sql
+CHANGE MASTER TO master_host='172.16.0.10', master_user='replicateur', master_password='mot_de_passe', master_log_file='mysql-bin.000002', master_log_pos=342;
+```
+
+### 4. Redémarrer l'esclave sur chaque serveur
+
+```sql
+START SLAVE;
+```
+
+---
+
+## Intégration avec le cluster (Pacemaker/CRM)
+
+Sur le serveur 1 :
+```bash
+crm configure primitive serviceMySQL ocf:heartbeat:mysql params socket=/var/run/mysqld/mysqld.sock
+crm configure clone cServiceMySQL serviceMySQL
+```
+
+Assurez-vous que les deux nœuds sont bien en ligne :
+```bash
+crm node online
+```
+à exécuter sur les deux serveurs.
+
+Pour vérifier l'état du cluster :
+```bash
+crm status
+```
+
     
+
+
+
+
