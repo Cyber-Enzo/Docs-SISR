@@ -156,6 +156,13 @@ Pour ignorer la politique de quorum :
 crm configure property no-quorum-policy="ignore"
 ```
 
+### Modifier en cas d'erreur
+
+Si des erreurs ont eté faites durant la configuration, il faut éditer le fichier `crm` :
+
+```bash
+crm configure edit
+```
 
 
 ---
@@ -221,6 +228,14 @@ Pour déplacer la ressource IPFailOver sur un nœud spécifique :
 
 ```bash
 crm resource move IPFailover srv-web1
+```
+
+---
+
+Effacer une ressource :
+
+```bash
+crm resource cleanup
 ```
 
 
