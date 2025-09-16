@@ -129,3 +129,58 @@ SHOW MASTER STATUS;
 	 SHOW SLAVE STATUS \G;
 	 ```
 	 > Vous devez voir l'IP du maître, le nom du user, le log file, la position, et deux lignes `Yes` pour `Slave_IO_Running` et `Slave_SQL_Running`.
+
+
+---
+
+## 6. Vérification de la réplication et tests
+
+### 1. Débloquer les tables sur le maître
+
+Dans MariaDB sur le serveur maître :
+```sql
+UNLOCK TABLES;
+```
+
+### 2. Utiliser la base de données et afficher les tables
+
+```sql
+USE gsb_valide;
+SHOW TABLES;
+```
+
+### 3. Afficher le contenu d'une table
+
+```sql
+SELECT * FROM Visiteur;
+```
+
+### 4. Changer le mot de passe d'un utilisateur
+
+```sql
+UPDATE gsb_valide.Visiteur SET mdp='toto' WHERE login='agest';
+```
+
+### 5. Vérifier la réplication sur l'esclave
+
+Sur le serveur esclave, dans MariaDB :
+```sql
+SELECT * FROM Visiteur;
+```
+Le mot de passe du login `agest` doit être passé à `toto`.
+
+### 6. Vérifier la position des fichiers de logs
+
+Sur le maître :
+```sql
+SHOW MASTER STATUS;
+```
+Sur l'esclave :
+```sql
+SHOW SLAVE STATUS \G;
+```
+> Remarque : Les deux machines doivent avoir la même position pour garantir la synchronisation.
+
+     
+
+    
