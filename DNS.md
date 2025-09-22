@@ -16,22 +16,31 @@ Ce guide explique comment configurer un serveur DNS redondant sous Debian 12 en 
 
 ### 1.1 Modifier la configuration réseau et renommer les machines
 
-Sur chaque machine, modifiez le nom d’hôte et le fichier `/etc/hosts` :
+Sur chaque machine, modifiez les fichiers `/etc/hosts` et `/etc/hostname` :
 
-```bash
-sudo hostnamectl set-hostname srv-dns1   # Sur la première machine
-sudo hostnamectl set-hostname srv-dns2   # Sur la seconde machine
-sudo nano /etc/hosts                     # Ajoutez les IP et noms des deux serveurs
-sudo reboot
-```
+1. Ouvrez le fichier `/etc/hostname` et remplacez le contenu par `srv-dns1` (ou `srv-dns2` pour la seconde machine).
+2. Ouvrez le fichier `/etc/hosts` et ajoutez les lignes suivantes :
+
+   ```
+   127.0.0.1   localhost
+   127.0.1.1   srv-dns1
+   172.16.0.3  srv-dns1
+   172.16.0.4  srv-dns2
+   ```
+
+3. Redémarrez la machine pour appliquer les modifications :
+
+   ```bash
+   reboot
+   ```
 
 ### 1.2 Installer BIND9
 
 Sur chaque serveur :
 
 ```bash
-sudo apt update
-sudo apt install bind9
+apt update
+apt install bind9
 ```
 
 ---
@@ -61,7 +70,7 @@ zone "0.16.172.in-addr.arpa" {
 Dans `/var/cache/bind/`, créez `db.sodecaf.fr` :
 
 ```bash
-sudo nano /var/cache/bind/db.sodecaf.fr
+nano /var/cache/bind/db.sodecaf.fr
 ```
 
 Contenu exemple :
@@ -89,7 +98,7 @@ web2        IN  CNAME srv-web2.sodecaf.fr.
 Vérifiez la configuration avec :
 
 ```bash
-sudo named-checkzone sodecaf.fr /var/cache/bind/db.sodecaf.fr
+named-checkzone sodecaf.fr /var/cache/bind/db.sodecaf.fr
 ```
 
 ### 2.3 Créer la zone inverse
@@ -97,11 +106,11 @@ sudo named-checkzone sodecaf.fr /var/cache/bind/db.sodecaf.fr
 Copiez le fichier de zone directe et modifiez-le :
 
 ```bash
-sudo cp /var/cache/bind/db.sodecaf.fr /var/cache/bind/db.172.16.0.rev
-sudo nano /var/cache/bind/db.172.16.0.rev
+cp /var/cache/bind/db.sodecaf.fr /var/cache/bind/db.172.16.0.rev
+nano /var/cache/bind/db.172.16.0.rev
 ```
 
-Gardez la partie SOA et NS, puis ajoutez :
+Gardez la partie SOA et NS, supprimer la partie en dessous puis ajoutez :
 
 ```bash
 3   IN  PTR srv-dns1.sodecaf.fr.
@@ -114,7 +123,7 @@ Gardez la partie SOA et NS, puis ajoutez :
 Vérifiez la configuration avec :
 
 ```bash
-sudo named-checkzone 0.16.172.in-addr-arpa /var/cache/bind/db.172.16.0.rev
+named-checkzone 0.16.172.in-addr-arpa /var/cache/bind/db.172.16.0.rev
 ```
 
 ---
@@ -142,9 +151,9 @@ zone "0.16.172.in-addr.arpa" {
 ### 3.2 Préparer le dossier slave
 
 ```bash
-sudo mkdir /var/cache/bind/slave
-sudo chgrp bind /var/cache/bind/slave
-sudo chmod g+w /var/cache/bind/slave
+mkdir /var/cache/bind/slave
+chgrp bind /var/cache/bind/slave
+chmod g+w /var/cache/bind/slave
 ```
 
 ---
@@ -164,7 +173,7 @@ forwarders {
 - Pour autoriser les requêtes de tous les réseaux :
 
 ```bash
-allow-query { any; };
+allow-query {any;};
 ```
 
 ---
@@ -174,14 +183,14 @@ allow-query { any; };
 Redémarrez BIND9 sur chaque serveur :
 
 ```bash
-sudo systemctl restart bind9
+systemctl restart bind9
 ```
 
 Vérifiez la configuration :
 
 ```bash
-sudo named-checkzone sodecaf.fr /var/cache/bind/db.sodecaf.fr
-sudo named-checkzone 0.16.172.in-addr-arpa /var/cache/bind/db.172.16.0.rev
+named-checkzone sodecaf.fr /var/cache/bind/db.sodecaf.fr
+named-checkzone 0.16.172.in-addr-arpa /var/cache/bind/db.172.16.0.rev
 ```
 
 ---
