@@ -24,8 +24,6 @@ Sur chaque machine, modifiez les fichiers `/etc/hosts` et `/etc/hostname` :
    ```
    127.0.0.1   localhost
    127.0.1.1   srv-dns1
-   172.16.0.3  srv-dns1
-   172.16.0.4  srv-dns2
    ```
 
 3. Redémarrez la machine pour appliquer les modifications :
@@ -216,5 +214,96 @@ dig -x 172.16.0.10 @172.16.0.3
 
 ---
 
-**Votre DNS redondant est maintenant opérationnel sous Debian 12 !**
+## Étape 7 : Sécurisation du DNS avec DNSSEC
 
+### 7.1 Activer DNSSEC dans les options
+
+Modifiez le fichier `/etc/bind/named.conf.options` et changez la ligne suivante :
+
+```bash
+dnssec-validation auto
+```
+
+En :
+
+```bash
+dnssec-validation yes
+```
+
+### 7.2 Générer les clés DNSSEC
+
+Créez un dossier pour stocker les clés :
+
+```bash
+cd /etc/bind/
+mkdir keys
+cd keys/
+```
+
+#### Générer les clés ZSK (Zone Signing Key)
+
+```bash
+dnssec-keygen -a rsasha1 -b 1024 -n zone sodecaf.fr
+ls -l
+```
+
+Notez les clés générées :
+- Clé publique : `Ksodecaf.fr.+005+09778.key`
+- Clé privée : `Ksodecaf.fr.+005+09778.private`
+
+#### Générer les clés KSK (Key Signing Key)
+
+```bash
+dnssec-keygen -a rsasha1 -b 1024 -f KSK -n zone sodecaf.fr
+ls -l
+```
+
+Notez également ces clés.
+
+### 7.3 Ajouter les clés dans le fichier de zone
+
+Modifiez le fichier `/var/cache/bind/db.sodecaf.fr` et ajoutez les lignes suivantes :
+
+```bash
+; KSK
+$include "/etc/bind/keys/Ksodecaf.fr.+005+48151.key"
+
+; ZSK
+$include "/etc/bind/keys/Ksodecaf.fr.+005+09778.key"
+```
+
+### 7.4 Signer la zone
+
+Utilisez la commande suivante pour signer la zone :
+
+```bash
+dnssec-signzone -o sodecaf.fr -t -k /etc/bind/keys/Ksodecaf.fr.+005+48151 db.sodecaf.fr /etc/bind/keys/Ksodecaf.fr.+005+09778
+```
+
+### 7.5 Modifier la configuration pour utiliser la zone signée
+
+Dans `/etc/bind/named.conf.local`, modifiez la ligne suivante :
+
+```bash
+file "db.sodecaf.fr";
+```
+
+En :
+
+```bash
+file "db.sodecaf.fr.signed";
+```
+
+### 7.6 Tester DNSSEC
+
+Sur une machine cliente, exécutez la commande suivante :
+
+```bash
+dig +dnssec www.sodecaf.fr
+```
+
+Le résultat doit inclure une clé chiffrée, confirmant que DNSSEC est activé avec succès.
+
+---
+
+**Votre DNS est maintenant sécurisé avec DNSSEC !**
