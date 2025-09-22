@@ -7,7 +7,7 @@ Ce guide explique comment configurer un serveur DNS redondant sous Debian 12 en 
 ## Prérequis
 
 - Deux machines Debian 12 (srv-dns1 et srv-dns2)
-- Accès root ou sudo
+- Deux machines Debian 12 (srv-web1 et sev-web2)
 - Réseau configuré (exemple : 172.16.0.0/24)
 
 ---
@@ -18,7 +18,7 @@ Ce guide explique comment configurer un serveur DNS redondant sous Debian 12 en 
 
 Sur chaque machine, modifiez les fichiers `/etc/hosts` et `/etc/hostname` :
 
-1. Ouvrez le fichier `/etc/hostname` et remplacez le contenu par `srv-dns1` (ou `srv-dns2` pour la seconde machine).
+1. Ouvrez le fichier `/etc/hostname` et remplacez le contenu par `srv-dns1` dans la premirèe pachine et `srv-dns2` pour la seconde machine.
 2. Ouvrez le fichier `/etc/hosts` et ajoutez les lignes suivantes :
 
    ```
@@ -173,7 +173,7 @@ forwarders {
 - Pour autoriser les requêtes de tous les réseaux :
 
 ```bash
-allow-query {any;};
+allow-query { any; };
 ```
 
 ---
@@ -192,6 +192,8 @@ Vérifiez la configuration :
 named-checkzone sodecaf.fr /var/cache/bind/db.sodecaf.fr
 named-checkzone 0.16.172.in-addr-arpa /var/cache/bind/db.172.16.0.rev
 ```
+
+Les deux commandes ci-dessus doivent renvoyer le numéro de série et "OK".
 
 ---
 
