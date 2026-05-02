@@ -37,6 +37,9 @@ CREATE USER 'nom_utilisateur'@'IP_SERVEUR_WEB' IDENTIFIED BY 'mot_de_passe';
 GRANT ALL PRIVILEGES ON nom_de_la_base.* TO 'nom_utilisateur'@'IP_SERVEUR_WEB';
 FLUSH PRIVILEGES;
 
+-- Voir les utilisateurs créés 
+SELECT User, Host FROM mysql.user;
+
 -- Quitter MySQL
 exit
 ```
