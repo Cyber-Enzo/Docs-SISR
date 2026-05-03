@@ -289,19 +289,78 @@ START SLAVE;
 
 ## Intégration avec le cluster (Pacemaker/CRM)
 
-Sur le serveur 1 :
+Afin de pouvoir configurer le cluster SQL, il faut au préalable installer et configurer Corosync et Pacemaker sur vos deux serveurs SQL, de la même manière que pour les serveurs web.
+
+### 1. Installation des paquets sur srv-sql1 et srv-sql2
+
+Sur les deux serveurs, installez les paquets nécessaires :
+```bash
+sudo apt update
+sudo apt install corosync pacemaker crmsh
+```
+
+### 2. Génération et copie de la clé d'authentification
+
+Sur **srv-sql1 uniquement**, générez la clé `authkey` :
+```bash
+sudo corosync-keygen
+```
+
+Copiez cette clé vers **srv-sql2** pour que les deux nœuds puissent communiquer :
+```bash
+sudo scp /etc/corosync/authkey etudiant@<IP_SRV_SQL2>:/etc/corosync/authkey
+```
+> **Note :** Si la copie directe en root n'est pas possible, utilisez l'utilisateur `etudiant` comme détaillé dans la documentation du cluster web, en n'oubliant pas de remettre les droits (`chmod 400` et `chown root:root`) sur le fichier `/etc/corosync/authkey` d'arrivée.
+
+### 3. Configuration de Corosync
+
+Sur les deux nœuds, éditez le fichier de configuration `/etc/corosync/corosync.conf` (en faisant une sauvegarde au préalable) et modifiez la section `nodelist` pour l'adapter à vos serveurs SQL :
+
+```ini
+nodelist {
+    node {
+        name: srv-sql1
+        nodeid: 1
+        ring0_addr: <IP_de_srv-sql1>
+    }
+    node {
+        name: srv-sql2
+        nodeid: 2
+        ring0_addr: <IP_de_srv-sql2>
+    }
+}
+```
+
+### 4. Démarrage des services
+
+Sur les deux serveurs, activez et démarrez les services :
+```bash
+sudo systemctl enable --now corosync pacemaker
+```
+
+Vérifiez que les deux nœuds communiquent correctement et sont "Online" :
+```bash
+crm status
+```
+> Le résultat doit indiquer : `Online: [ srv-sql1 srv-sql2 ]`
+
+---
+
+### 5. Configuration des ressources dans Pacemaker
+
+Une fois le cluster de base fonctionnel et les deux nœuds reconnus, vous pouvez configurer les propriétés CRM (depuis n'importe quel nœud) :
+```bash
+crm configure property stonith-enabled=false
+crm configure property no-quorum-policy="ignore"
+```
+
+Ensuite, ajoutez la ressource du service MySQL et clonez-la pour qu'elle soit gérée sur les deux serveurs en même temps :
 ```bash
 crm configure primitive serviceMySQL ocf:heartbeat:mysql params socket=/var/run/mysqld/mysqld.sock
 crm configure clone cServiceMySQL serviceMySQL
 ```
 
-Assurez-vous que les deux nœuds sont bien en ligne :
-```bash
-crm node online
-```
-à exécuter sur les deux serveurs.
-
-Pour vérifier l'état du cluster :
+Vérifiez enfin l'état complet de vos ressources et du cluster :
 ```bash
 crm status
 ```

@@ -16,7 +16,7 @@ apt install corosync pacemaker crmsh
 
 ## 2. Génération de la clé d'authentification
 
-Générez la clé d'authentification pour Corosync :
+Générez la clé d'authentification pour Corosync (sur le premier serveur) :
 
 ```bash
 corosync-keygen
@@ -29,6 +29,22 @@ ls /etc/corosync
 ```
 
 Vous devez voir le fichier `authkey`.
+
+> **Important :** La clé `authkey` doit impérativement être la même sur les 2 serveurs web. Pour cela, deux solutions :
+> - Soit faire le **clonage** de la VM comme expliqué plus bas (section 6).
+> - Soit faire un **scp** de `srv-web1` vers `srv-web2` avec le compte `etudiant` et l'IP du serveur 2 (en pensant à bien attribuer les droits dans `/etc/corosync`) :
+> 
+> ```bash
+> # Sur srv-web1 :
+> sudo cp /etc/corosync/authkey /home/etudiant/
+> sudo chown etudiant:etudiant /home/etudiant/authkey
+> scp /home/etudiant/authkey etudiant@<IP_SRV_WEB2>:/home/etudiant/
+> 
+> # Sur srv-web2 :
+> sudo mv /home/etudiant/authkey /etc/corosync/
+> sudo chown root:root /etc/corosync/authkey
+> sudo chmod 400 /etc/corosync/authkey
+> ```
 
 ---
 
