@@ -94,14 +94,14 @@ quorum {
 
 nodelist {
     node {
-        name: serv1   # À modifier selon le nom du serveur
+        name: srv-web1   # À modifier selon le nom du serveur
         nodeid: 1
-        ring0_addr: 172.16.0.10
+        ring0_addr: 172.200.0.1
     }
     node {
-        name: serv2   # À modifier selon le nom du serveur
+        name: srv-web2   # À modifier selon le nom du serveur
         nodeid: 2
-        ring0_addr: 172.16.0.11
+        ring0_addr: 172.200.0.2
     }
 }
 
@@ -111,7 +111,7 @@ service {
 }
 ```
 
-- Adaptez les noms (`serv1`, `serv2`) et les adresses IP à votre infrastructure.
+- Adaptez les noms (`srv-web1`, `srv-web2`) et les adresses IP à votre infrastructure.
 
 ---
 
@@ -188,10 +188,10 @@ crm configure edit
 Pour configurer le failover d'IP :
 
 ```bash
-crm configure primitive IPFailover ocf:heartbeat:IPaddr2 params ip=172.16.0.12 cidr_netmask=24 nic=ens33 iflabel=VIP
+crm configure primitive IPFailover ocf:heartbeat:IPaddr2 params ip=172.200.0.3 cidr_netmask=24 nic=ens192.200 iflabel=VIP
 ```
 
-> **Remarque :** `ens33` correspond à l'interface réseau utilisée sur cet exemple. Pensez à remplacer `ens33` par le nom de votre propre interface réseau (ex : `eth0`, `enp0s3`, etc.) selon votre configuration.
+> **Remarque :** `ens192.200` correspond à l'interface réseau utilisée dans le VLAN 200sur cet exemple. Pensez à remplacer `ens192.200` par le nom de votre propre interface réseau (ex : `eth0`, `enp0s3`, etc.) selon votre configuration.
 
 Après configuration :
 - La commande `ip a` affichera l'IP de la machine et l'IP du cluster.
