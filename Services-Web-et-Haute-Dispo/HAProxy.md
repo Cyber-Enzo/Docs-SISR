@@ -21,10 +21,10 @@ Pour configurer les serveurs Web en mode actif/actif avec Apache2 démarré sur 
 
 ```bash
 crm resource stop serviceWeb
-crn resource stop IPFailover
+crm resource stop IPFailover
 crm configure delete servweb
 crm resource start IPFailover 
-crn configure clone cServiceWeb serviceWeb
+crm configure clone cServiceWeb serviceWeb
 crm resource start serviceWeb
 ```
 
@@ -55,12 +55,6 @@ nano /etc/hostname # Remplacer Debian par haproxy
 reboot
 ```
 
-### 4. Configuration réseau
-
-Dans VMware Workstation :
-1. Créer un "LAN segment" nommé "DMZ Sodecaf"
-2. Configurer les deux serveurs Web dans ce segment DMZ
-
 ## Configuration sur Debian
 
 ### Configuration de base
@@ -73,7 +67,7 @@ nano /etc/haproxy/haproxy.cfg
 2. Configuration initiale simple :
 ```ini
 listen httpProxy
-        bind 172.16.0.13:80
+        bind 172.16.0.10:80
         balance roundrobin
         option httpclose
         option httpchk HEAD / HTTP/1.0
@@ -89,8 +83,8 @@ listen httpProxy
 Pour une meilleure lisibilité et maintenance, vous pouvez utiliser une configuration plus structurée :
 
 ```ini
-frontend websodecaf
-        bind 172.16.0.13:80
+frontend webgsb
+        bind 172.16.0.10:80
         default_backend clusterweb
 
 backend clusterweb
@@ -115,8 +109,8 @@ server srv-web2 192.168.0.2:80 weight 50 check   # Reçoit 1/3 du trafic
 
 ### Test et monitoring
 
-1. Tester l'accès au site web : `http://172.16.0.13`
-2. Accéder aux statistiques HAProxy : `http://172.16.0.13/statsHaproxy`
+1. Tester l'accès au site web : `http://172.16.0.10`
+2. Accéder aux statistiques HAProxy : `http://172.16.0.10/statsHaproxy`
 
 
 
@@ -141,16 +135,16 @@ Informations à fournir pour le certificat :
 |-------|---------|
 | Country Name | FR |
 | State | France |
-| Locality | Montauban |
-| Organization | Sodecaf |
+| Locality | Paris |
+| Organization | GSB |
 | Organizational Unit | [laisser vide] |
-| Common Name | www.sodecaf.local |
-| Email Address | admin@sodecaf.local |
+| Common Name | www.gsb.local |
+| Email Address | admin@gsb.local |
 
 ### 2. Fusion des certificats
 
 ```bash
-cat cert.pem privateKey.pem > sodecaf.pem
+cat cert.pem privateKey.pem > gsb.pem
 ```
 
 ### 3. Configuration HTTPS dans HAProxy
@@ -158,12 +152,12 @@ cat cert.pem privateKey.pem > sodecaf.pem
 Modifier le fichier de configuration pour activer HTTPS et la redirection automatique :
 
 ```ini
-frontend websodecaf
-        bind 172.16.0.13:443 ssl crt /etc/haproxy/cert/sodecaf.pem
+frontend webgsb
+        bind 172.16.0.10:443 ssl crt /etc/haproxy/cert/gsb.pem
         default_backend clusterweb
 
-frontend sodecafhttp
-        bind 172.16.0.13:80
+frontend gsbhttp
+        bind 172.16.0.10:80
         http-request redirect scheme https unless { ssl_fc }
         default_backend clusterweb
 ```

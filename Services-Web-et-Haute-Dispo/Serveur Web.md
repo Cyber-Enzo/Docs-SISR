@@ -86,13 +86,13 @@ Si vous possédez déjà les fichiers de votre site web sous format `.zip`, vous
    Installez l'utilitaire `unzip`, déplacez l'archive dans `/var/www/` et dézippez-la :
    ```bash
    sudo apt install unzip
-   sudo mv /home/etudiant/votre_archive.zip /var/www/
-   cd /var/www/
+   sudo mv /home/etudiant/votre_archive.zip /var/www/votre_domaine/
+   cd /var/www/votre_domaine/
    sudo unzip votre_archive.zip
    ```
 
 4. **Placer les fichiers et nettoyer** :
-   L'extraction a créé un dossier `files`. Déplacez son contenu vers votre dossier web (ex: `appliFrais` ou `votre_domaine`), puis supprimez l'archive et le dossier `files` devenu vide :
+   L'extraction a créé un dossier `files`. Déplacez son contenu vers votre dossier web (ex: `votre_domaine`), puis supprimez l'archive et le dossier `files` devenu vide :
    ```bash
    # Déplacer le contenu de "files" vers votre domaine
    sudo mv /var/www/files/* /var/www/votre_domaine/
@@ -122,7 +122,7 @@ Ajoutez :
     ServerName votre_domaine
     ServerAlias www.votre_domaine
     DocumentRoot /var/www/votre_domaine
-    DirectoryIndex index.html index.php
+    DirectoryIndex index.html
     ErrorLog ${APACHE_LOG_DIR}/error.log
     CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
