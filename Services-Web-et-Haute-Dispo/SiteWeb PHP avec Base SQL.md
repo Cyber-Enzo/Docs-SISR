@@ -72,7 +72,7 @@ Si ce n'est pas déjà fait, il faut autoriser MariaDB à écouter sur d'autres 
 
 Éditez le fichier de configuration de MariaDB sur le serveur SQL :
 ```bash
-sudo nano /etc/mysql/mariadb.conf.d/50-server.conf
+sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
 ```
 
 Trouvez la ligne `bind-address` et modifiez-la pour écouter sur toutes les interfaces :

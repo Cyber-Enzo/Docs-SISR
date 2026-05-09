@@ -94,12 +94,12 @@ quorum {
 
 nodelist {
     node {
-        name: srv-web1   # À modifier selon le nom du serveur
+        name: srv-web1
         nodeid: 1
         ring0_addr: 172.200.0.1
     }
     node {
-        name: srv-web2   # À modifier selon le nom du serveur
+        name: srv-web2
         nodeid: 2
         ring0_addr: 172.200.0.2
     }
